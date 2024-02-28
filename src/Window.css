@@ -1,0 +1,82 @@
+/* Window.css */
+
+.window {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.title-bar {
+  background-color: #f0f0f0;
+  padding: 5px;
+  cursor: move;
+  border-bottom: 1px solid #ccc;
+}
+
+.content {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Stilizare pentru cursor la colțurile ferestrei pentru redimensionare */
+.window-resize {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+.window-resize-top {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+
+.window-resize-bottom {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+
+.window-resize-left {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+
+.window-resize-right {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
+
+.window-resize-top-left {
+  top: 0;
+  left: 0;
+  cursor: nw-resize;
+}
+
+.window-resize-top-right {
+  top: 0;
+  right: 0;
+  cursor: ne-resize;
+}
+
+.window-resize-bottom-left {
+  bottom: 0;
+  left: 0;
+  cursor: sw-resize;
+}
+
+.window-resize-bottom-right {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
