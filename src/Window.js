@@ -96,19 +96,29 @@ function Window({
   }, [handleMouseMove, handleMouseUp]);
 
   const checkURL = useCallback(async (url) => {
+    console.log("URL-ul este:", url);
+
+    
     try {
-      const response = await fetch(
-        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(url)}`
-      );
-      if (response.ok) {
-        setIsValid(true);
-      } else {
-        setIsValid(false);
-      }
-    } catch (error) {
-      console.error("Error fetching URL status:", error);
+      await fetch(url);
+      setIsValid(true);
+    }catch(error){
       setIsValid(false);
     }
+
+    // try {
+    //   const response = await fetch(
+    //     `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(url)}`
+    //   );
+    //   if (response.ok) {
+    //     setIsValid(true);
+    //   } else {
+    //     setIsValid(false);
+    //   }
+    // } catch (error) {
+    //   console.error("Error fetching URL status:", error);
+    //   setIsValid(false);
+    // }
   }, []);
 
   useEffect(() => {
