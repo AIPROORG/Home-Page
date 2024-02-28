@@ -25,18 +25,42 @@ function Window({
       } else if (resizeHandle) {
         const dx = e.clientX - dragOffset.x;
         const dy = e.clientY - dragOffset.y;
-        let newWidth = width + dx;
-        let newHeight = height + dy;
 
-        if (resizeHandle.includes("right") || resizeHandle.includes("left")) {
-          onResize(id, Math.max(100, newWidth), height);
+        let newWidth = width;
+        let newHeight = height;
+        let newX = x;
+        let newY = y;
+
+        if (resizeHandle.includes("right")) {
+          newWidth = Math.max(100, width + dx);
+        } else if (resizeHandle.includes("left")) {
+          newWidth = Math.max(100, width - dx);
+          newX = width > 100 ? x + dx : x;
         }
-        if (resizeHandle.includes("bottom") || resizeHandle.includes("top")) {
-          onResize(id, width, Math.max(100, newHeight));
+
+        if (resizeHandle.includes("bottom")) {
+          newHeight = Math.max(100, height + dy);
+        } else if (resizeHandle.includes("top")) {
+          newHeight = Math.max(100, height - dy);
+          newY = height > 100 ? y + dy : y;
         }
+
+        onResize(id, newWidth, newHeight, newX, newY);
+        setDragOffset({ x: e.clientX, y: e.clientY });
       }
     },
-    [id, isDragging, dragOffset, onMove, resizeHandle, width, height, onResize]
+    [
+      id,
+      isDragging,
+      dragOffset,
+      onMove,
+      resizeHandle,
+      width,
+      height,
+      x,
+      y,
+      onResize,
+    ]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -55,15 +79,12 @@ function Window({
     [x, y]
   );
 
-  const handleResizeMouseDown = useCallback(
-    (e, handle) => {
-      e.preventDefault();
-      setResizeHandle(handle);
-      setIsDragging(true); // Considerăm începerea redimensionării ca un drag
-      setDragOffset({ x: e.clientX - width, y: e.clientY - height });
-    },
-    [width, height]
-  );
+  const handleResizeMouseDown = useCallback((e, handle) => {
+    e.preventDefault();
+    e.stopPropagation(); // Previne declanșarea evenimentelor părinte
+    setResizeHandle(handle);
+    setDragOffset({ x: e.clientX, y: e.clientY });
+  }, []);
 
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
@@ -74,7 +95,6 @@ function Window({
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  // Funcția pentru verificarea URL-ului
   const checkURL = useCallback(async (url) => {
     try {
       const response = await fetch(
@@ -83,7 +103,7 @@ function Window({
       if (response.ok) {
         setIsValid(true);
       } else {
-        setIsValid("restricted");
+        setIsValid(false);
       }
     } catch (error) {
       console.error("Error fetching URL status:", error);
@@ -109,9 +129,7 @@ function Window({
         </button>
       </div>
       <div className="content">
-        {isValid === null ? (
-          <p>Verific URL...</p>
-        ) : isValid === true ? (
+        {isValid ? (
           <iframe
             src={url}
             title={title}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Window from "./Window";
+import "./App.css"; // Asigură-te că ai acest fișier CSS pentru stilizarea aplicației
 
 function App() {
   const [windows, setWindows] = useState([
@@ -10,58 +11,59 @@ function App() {
       y: 50,
       width: 800,
       height: 600,
-      url: "https://area4u.ro/",
+      url: "https://www.smartbill.ro/",
     },
   ]);
   const [newUrl, setNewUrl] = useState("");
 
   const addNewWindow = () => {
+    const newId = windows.length ? windows[windows.length - 1].id + 1 : 1;
     const newWindow = {
-      id: windows.length ? windows[windows.length - 1].id + 1 : 1,
-      title: `Fereastra ${windows.length + 1}`,
+      id: newId,
+      title: `Fereastra ${newId}`,
       x: 50 * (windows.length + 1),
       y: 50 * (windows.length + 1),
       width: 800,
       height: 600,
       url: newUrl,
     };
-    setWindows((prevWindows) => [...prevWindows, newWindow]);
-    setNewUrl("");
+    setWindows([...windows, newWindow]);
+    setNewUrl(""); // Resetează câmpul de intrare după adăugare
   };
 
   const onWindowMove = (id, newX, newY) => {
-    setWindows((prevWindows) =>
-      prevWindows.map((window) =>
+    setWindows(
+      windows.map((window) =>
         window.id === id ? { ...window, x: newX, y: newY } : window
       )
     );
   };
 
-  const onWindowResize = (id, newWidth, newHeight) => {
-    setWindows((prevWindows) =>
-      prevWindows.map((window) =>
+  const onWindowResize = (id, newWidth, newHeight, newX, newY) => {
+    setWindows(
+      windows.map((window) =>
         window.id === id
-          ? { ...window, width: newWidth, height: newHeight }
+          ? { ...window, width: newWidth, height: newHeight, x: newX, y: newY }
           : window
       )
     );
   };
 
   const onCloseWindow = (id) => {
-    setWindows((prevWindows) =>
-      prevWindows.filter((window) => window.id !== id)
-    );
+    setWindows(windows.filter((window) => window.id !== id));
   };
 
   return (
     <div className="app">
-      <input
-        type="text"
-        value={newUrl}
-        onChange={(e) => setNewUrl(e.target.value)}
-        placeholder="Introduceți URL-ul site-ului"
-      />
-      <button onClick={addNewWindow}>Adaugă Site</button>
+      <div className="url-input-container">
+        <input
+          type="text"
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+          placeholder="Introduceți URL-ul site-ului"
+        />
+        <button onClick={addNewWindow}>Adaugă Site</button>
+      </div>
       {windows.map((window) => (
         <Window
           key={window.id}
