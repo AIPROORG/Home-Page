@@ -1,119 +1,101 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./Window.css";
 
-function Window({ id, title, x, y, width, height, onMove, onResize, url }) {
+function Window({
+  id,
+  title,
+  x,
+  y,
+  width,
+  height,
+  onMove,
+  onResize,
+  url,
+  onClose,
+}) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeHandle, setResizeHandle] = useState(null);
-  const [startPosition, setStartPosition] = useState({ x: 0, y: 0 });
-  const [startSize, setStartSize] = useState({ width: 0, height: 0 });
-
-  const [isValid, setIsValid] = useState(null);
+  const [isValid, setIsValid] = useState(null); // Starea pentru validarea URL-ului
 
   const handleMouseMove = useCallback(
     (e) => {
       if (isDragging) {
         onMove(id, e.clientX - dragOffset.x, e.clientY - dragOffset.y);
       } else if (resizeHandle) {
-        const dx = e.clientX - startPosition.x;
-        const dy = e.clientY - startPosition.y;
-        let newWidth = startSize.width;
-        let newHeight = startSize.height;
+        const dx = e.clientX - dragOffset.x;
+        const dy = e.clientY - dragOffset.y;
+        let newWidth = width + dx;
+        let newHeight = height + dy;
 
-        if (resizeHandle.includes("right"))
-          newWidth = Math.max(100, startSize.width + dx);
-        if (resizeHandle.includes("bottom"))
-          newHeight = Math.max(100, startSize.height + dy);
-        if (resizeHandle.includes("left")) {
-          newWidth = Math.max(100, startSize.width - dx);
-          if (newWidth > 100) onMove(id, startPosition.x + dx, y);
+        if (resizeHandle.includes("right") || resizeHandle.includes("left")) {
+          onResize(id, Math.max(100, newWidth), height);
         }
-        if (resizeHandle.includes("top")) {
-          newHeight = Math.max(100, startSize.height - dy);
-          if (newHeight > 100) onMove(id, x, startPosition.y + dy);
+        if (resizeHandle.includes("bottom") || resizeHandle.includes("top")) {
+          onResize(id, width, Math.max(100, newHeight));
         }
-
-        onResize(id, newWidth, newHeight);
       }
     },
-    [
-      dragOffset,
-      id,
-      isDragging,
-      onMove,
-      onResize,
-      resizeHandle,
-      startPosition,
-      startSize,
-      x,
-      y,
-    ]
+    [id, isDragging, dragOffset, onMove, resizeHandle, width, height, onResize]
   );
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    setResizeHandle(null);
-  };
+  const handleMouseUp = useCallback(() => {
+    if (isDragging || resizeHandle) {
+      setIsDragging(false);
+      setResizeHandle(null);
+    }
+  }, [isDragging, resizeHandle]);
 
-  const handleMouseDown = (e, isResize = false) => {
-    e.preventDefault();
-    if (!isResize) {
+  const handleMouseDown = useCallback(
+    (e) => {
+      e.preventDefault();
       setIsDragging(true);
       setDragOffset({ x: e.clientX - x, y: e.clientY - y });
-    }
-  };
+    },
+    [x, y]
+  );
 
-  const handleResizeMouseDown = (e, handle) => {
-    e.preventDefault();
-    setResizeHandle(handle);
-    setStartPosition({ x: e.clientX, y: e.clientY });
-    setStartSize({ width, height });
-    handleMouseDown(e, true);
-  };
+  const handleResizeMouseDown = useCallback(
+    (e, handle) => {
+      e.preventDefault();
+      setResizeHandle(handle);
+      setIsDragging(true); // Considerăm începerea redimensionării ca un drag
+      setDragOffset({ x: e.clientX - width, y: e.clientY - height });
+    },
+    [width, height]
+  );
 
+  useEffect(() => {
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
+  // Funcția pentru verificarea URL-ului
   const checkURL = useCallback(async (url) => {
     try {
-      const isValid = await fetch(
-        `http://localhost:3001/proxy?urlTocheck=${url}`
+      const response = await fetch(
+        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(url)}`
       );
-
-      setIsValid(isValid.status === 200);
-    } catch (e) {
+      if (response.ok) {
+        setIsValid(true);
+      } else {
+        setIsValid("restricted");
+      }
+    } catch (error) {
+      console.error("Error fetching URL status:", error);
       setIsValid(false);
     }
   }, []);
 
   useEffect(() => {
-    if (url != null && url !== "") {
-      checkURL(url).then();
+    if (url) {
+      checkURL(url);
     }
   }, [url, checkURL]);
-
-  useEffect(() => {
-    if (isDragging || resizeHandle) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [
-    isDragging,
-    resizeHandle,
-    dragOffset,
-    startPosition,
-    startSize,
-    x,
-    y,
-    width,
-    height,
-    onMove,
-    onResize,
-    id,
-    handleMouseMove,
-  ]);
 
   return (
     <div
@@ -122,11 +104,14 @@ function Window({ id, title, x, y, width, height, onMove, onResize, url }) {
     >
       <div className="title-bar" onMouseDown={handleMouseDown}>
         {title}
+        <button className="close-button" onClick={onClose}>
+          X
+        </button>
       </div>
       <div className="content">
         {isValid === null ? (
-          <p>Check URL...</p>
-        ) : isValid ? (
+          <p>Verific URL...</p>
+        ) : isValid === true ? (
           <iframe
             src={url}
             title={title}
@@ -136,7 +121,10 @@ function Window({ id, title, x, y, width, height, onMove, onResize, url }) {
             allowFullScreen
           ></iframe>
         ) : (
-          <p>Invalid URL...</p>
+          <p>
+            URL-ul nu poate fi încărcat sau este restricționat pentru afișare în
+            iframe.
+          </p>
         )}
       </div>
       {[
@@ -153,7 +141,7 @@ function Window({ id, title, x, y, width, height, onMove, onResize, url }) {
           key={handle}
           className={`window-resize window-resize-${handle}`}
           onMouseDown={(e) => handleResizeMouseDown(e, handle)}
-        ></div>
+        />
       ))}
     </div>
   );
