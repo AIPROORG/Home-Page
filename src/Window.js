@@ -17,6 +17,7 @@ function Window({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeHandle, setResizeHandle] = useState(null);
   const [isValid, setIsValid] = useState(null); // Starea pentru validarea URL-ului
+  const [faviconUrl, setFaviconUrl] = useState(null);
 
   const handleMouseMove = useCallback(
     (e) => {
@@ -104,10 +105,12 @@ function Window({
         setIsValid(true);
       } else {
         setIsValid(false);
+        setFaviconUrl(`https://www.google.com/s2/favicons?domain=${url}`);
       }
     } catch (error) {
       console.error("Error fetching URL status:", error);
       setIsValid(false);
+      setFaviconUrl(`https://www.google.com/s2/favicons?domain=${url}`);
     }
   }, []);
 
@@ -139,10 +142,16 @@ function Window({
             allowFullScreen
           ></iframe>
         ) : (
-          <p>
-            URL-ul nu poate fi încărcat sau este restricționat pentru afișare în
-            iframe.
-          </p>
+          <div onClick={() => window.open(url, "_blank")}>
+            <img width="50px" height="50px"
+              src={faviconUrl}
+              alt={title}
+            />
+            <p>
+              URL-ul nu poate fi încărcat sau este restricționat pentru afișare în
+              iframe. Click pe iconiță pentru a deschide în tab nou.
+            </p>
+          </div>
         )}
       </div>
       {[
