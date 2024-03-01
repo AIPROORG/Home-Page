@@ -6,10 +6,12 @@ function App() {
   const [windows, setWindows] = useState([]);
   const [nonEmbeddableUrls, setNonEmbeddableUrls] = useState([]);
   const [newUrl, setNewUrl] = useState("");
+  const [showInput, setShowInput] = useState(false);
 
   const addNewWindow = async () => {
-    const newId = windows.length + nonEmbeddableUrls.length + 1;
+    if (!newUrl) return;
 
+    const newId = windows.length + nonEmbeddableUrls.length + 1;
     try {
       const response = await fetch(
         `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(newUrl)}`
@@ -18,9 +20,9 @@ function App() {
         const newWindow = {
           id: newId,
           title: `Fereastra ${newId}`,
-          x: 0, // x și y vor fi ajustate dinamic în CSS
+          x: 0,
           y: 0,
-          width: 300, // Dimensiunea inițială a ferestrei
+          width: 300,
           height: 200,
           url: newUrl,
         };
@@ -30,11 +32,20 @@ function App() {
       }
     } catch (error) {
       console.error("Error checking URL embeddability:", error);
-      // Tratează erorile de rețea sau de server tratând URL-ul ca non-embeddable
       setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
     }
-
+    setShowInput(false);
     setNewUrl("");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      addNewWindow();
+    }
+  };
+
+  const toggleInput = () => {
+    setShowInput(!showInput);
   };
 
   const onWindowMove = (id, newX, newY) => {
@@ -61,14 +72,22 @@ function App() {
 
   return (
     <div className="app">
-      <div className="url-input-container">
-        <input
-          type="text"
-          value={newUrl}
-          onChange={(e) => setNewUrl(e.target.value)}
-          placeholder="Introduceți URL-ul site-ului"
-        />
-        <button onClick={addNewWindow}>Adaugă Site</button>
+      <div className="add-url-container">
+        <button className="add-url-button" onClick={toggleInput}>
+          +
+        </button>
+        {showInput && (
+          <div className="url-input-popup">
+            <input
+              type="text"
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Introduceți URL-ul site-ului"
+              autoFocus
+            />
+          </div>
+        )}
       </div>
       <div className="iframe-grid-container">
         <div className="windows-container">
