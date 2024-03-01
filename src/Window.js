@@ -119,8 +119,8 @@ function Window({
 
   return (
     <div
-      className="window"
-      style={{ left: x, top: y, width: width, height: height }}
+      className="window-wrapper"
+      // style={{ left: x, top: y, width: width, height: height }}
     >
       <div className="title-bar" onMouseDown={handleMouseDown}>
         {title}

@@ -74,7 +74,7 @@ function App() {
     <div className="app">
       <div className="add-url-container">
         <button className="add-url-button" onClick={toggleInput}>
-          +
+          <span> &#10133;</span>
         </button>
         {showInput && (
           <div className="url-input-popup">
@@ -92,7 +92,7 @@ function App() {
       <div className="iframe-grid-container">
         <div className="windows-container">
           {windows.map((window) => (
-            <div className="window-wrapper" key={window.id}>
+            <div key={window.id}>
               <Window
                 id={window.id}
                 title={window.title}
