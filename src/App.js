@@ -1,35 +1,40 @@
 import React, { useState } from "react";
 import Window from "./Window";
-import "./App.css"; // Asigură-te că ai acest fișier CSS pentru stilizarea aplicației
+import "./App.css";
 
 function App() {
-  const [windows, setWindows] = useState([
-    {
-      id: 1,
-      title: "Exemplu Site",
-      x: 50,
-      y: 50,
-      width: 800,
-      height: 600,
-      url: "https://www.smartbill.ro/",
-    },
-  ]);
+  const [windows, setWindows] = useState([]);
+  const [nonEmbeddableUrls, setNonEmbeddableUrls] = useState([]);
   const [newUrl, setNewUrl] = useState("");
 
-  const addNewWindow = () => {
-    const newId = windows.length ? windows[windows.length - 1].id + 1 : 1;
-    const newWindow = {
-      id: newId,
-      title: `Fereastra ${newId}`,
-      x: 50 * (windows.length + 1),
-      y: 50 * (windows.length + 1),
-      width: 800,
-      height: 600,
-      url: newUrl,
-    };
-    console.log(newWindow);
-    setWindows([...windows, newWindow]);
-    setNewUrl(""); // Resetează câmpul de intrare după adăugare
+  const addNewWindow = async () => {
+    const newId = windows.length + nonEmbeddableUrls.length + 1;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(newUrl)}`
+      );
+      if (response.ok) {
+        const newWindow = {
+          id: newId,
+          title: `Fereastra ${newId}`,
+          x: 0, // x și y vor fi ajustate dinamic în CSS
+          y: 0,
+          width: 300, // Dimensiunea inițială a ferestrei
+          height: 200,
+          url: newUrl,
+        };
+        setWindows([...windows, newWindow]);
+      } else {
+        setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+      }
+    } catch (error) {
+      console.error("Error checking URL embeddability:", error);
+      // Tratează erorile de rețea sau de server tratând URL-ul ca non-embeddable
+      setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+    }
+
+    setNewUrl("");
   };
 
   const onWindowMove = (id, newX, newY) => {
@@ -65,21 +70,33 @@ function App() {
         />
         <button onClick={addNewWindow}>Adaugă Site</button>
       </div>
-      {windows.map((window) => (
-        <Window
-          key={window.id}
-          id={window.id}
-          title={window.title}
-          x={window.x}
-          y={window.y}
-          width={window.width}
-          height={window.height}
-          url={window.url}
-          onMove={onWindowMove}
-          onResize={onWindowResize}
-          onClose={() => onCloseWindow(window.id)}
-        />
-      ))}
+      <div className="iframe-grid-container">
+        <div className="windows-container">
+          {windows.map((window) => (
+            <div className="window-wrapper" key={window.id}>
+              <Window
+                id={window.id}
+                title={window.title}
+                x={window.x}
+                y={window.y}
+                width={window.width}
+                height={window.height}
+                url={window.url}
+                onMove={onWindowMove}
+                onResize={onWindowResize}
+                onClose={() => onCloseWindow(window.id)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="non-embeddable-bar">
+        {nonEmbeddableUrls.map((url, index) => (
+          <button key={index} onClick={() => window.open(url, "_blank")}>
+            {url}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

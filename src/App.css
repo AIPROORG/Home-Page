@@ -1,38 +1,35 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.app {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
 }
 
-.App-link {
-  color: #61dafb;
+.iframe-grid-container {
+  flex-grow: 1;
+  overflow-y: auto; /* Bara de scroll pentru grid, dacă este necesar */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.windows-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 coloane */
+  gap: 10px; /* Spațiu între ferestre */
+  padding: 10px;
+}
+
+.window-wrapper {
+  width: 100%; /* Lățimea wrapper-ului este controlată de grid, nu de fereastră */
+  resize: both; /* Permite redimensionarea */
+  overflow: auto; /* Permite conținutului să se scrolleze dacă fereastra este redimensionată mai mic */
+}
+
+.non-embeddable-bar {
+  background-color: rgba(128, 0, 128, 0.2); /* Mov transparent */
+  border-top: 1px solid #ccc;
+  padding: 10px;
+  display: flex;
+  overflow-x: auto;
+}
+
+.non-embeddable-bar button {
+  margin-right: 10px;
 }
