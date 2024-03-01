@@ -27,6 +27,7 @@ function App() {
       height: 600,
       url: newUrl,
     };
+    console.log(newWindow);
     setWindows([...windows, newWindow]);
     setNewUrl(""); // Resetează câmpul de intrare după adăugare
   };

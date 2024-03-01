@@ -139,10 +139,9 @@ function Window({
             allowFullScreen
           ></iframe>
         ) : (
-          <p>
-            URL-ul nu poate fi încărcat sau este restricționat pentru afișare în
-            iframe.
-          </p>
+          <a href={url} target="_blank">
+            <input type="button"></input>
+          </a>
         )}
       </div>
       {[
