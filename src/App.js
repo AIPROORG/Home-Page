@@ -74,7 +74,7 @@ function App() {
     <div className="app">
       <div className="add-url-container">
         <button className="add-url-button" onClick={toggleInput}>
-          <span> &#10133;</span>
+          +
         </button>
         {showInput && (
           <div className="url-input-popup">
@@ -92,7 +92,7 @@ function App() {
       <div className="iframe-grid-container">
         <div className="windows-container">
           {windows.map((window) => (
-            <div key={window.id}>
+            <div className="window-wrapper" key={window.id}>
               <Window
                 id={window.id}
                 title={window.title}
@@ -111,9 +111,9 @@ function App() {
       </div>
       <div className="non-embeddable-bar">
         {nonEmbeddableUrls.map((url, index) => (
-          <button key={index} onClick={() => window.open(url, "_blank")}>
-            {url}
-          </button>
+          <a key={index} href={url} target="_blank">
+            <img src={'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=' +url+ '&size=64'} alt="" style={{ height: '3rem', width: '3rem', marginRight: '5px'}}/>
+          </a>
         ))}
       </div>
     </div>
