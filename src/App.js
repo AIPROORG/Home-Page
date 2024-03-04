@@ -28,11 +28,15 @@ function App() {
         };
         setWindows([...windows, newWindow]);
       } else {
-        setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+        if (!nonEmbeddableUrls.includes(newUrl)) {
+          setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+        }
       }
     } catch (error) {
       console.error("Error checking URL embeddability:", error);
-      setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+      if (!nonEmbeddableUrls.includes(newUrl)) {
+        setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+      }
     }
     setShowInput(false);
     setNewUrl("");
@@ -112,7 +116,15 @@ function App() {
       <div className="non-embeddable-bar">
         {nonEmbeddableUrls.map((url, index) => (
           <a key={index} href={url} target="_blank">
-            <img src={'https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=' +url+ '&size=64'} alt="" style={{ height: '3rem', width: '3rem', marginRight: '5px'}}/>
+            <img
+              src={
+                "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=" +
+                url +
+                "&size=64"
+              }
+              alt=""
+              style={{ height: "3rem", width: "3rem", marginRight: "5px" }}
+            />
           </a>
         ))}
       </div>

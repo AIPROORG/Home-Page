@@ -8,19 +8,29 @@ app.use(cors());
 
 async function checkIfEmbeddable(url) {
   try {
-    const response = await axios.head(url, {timeout: 5000}); // Menținem timeout-ul
+    const response = await axios.head(url, { timeout: 5000 }); // Menținem timeout-ul
     const xFrameOptions = response.headers["x-frame-options"];
     const contentSecurityPolicy = response.headers["content-security-policy"];
 
     // Verificăm restricțiile specifice prin antete, ignorând erorile de rețea
-    if (xFrameOptions && (xFrameOptions.toLowerCase().includes("deny") || xFrameOptions.toLowerCase().includes("sameorigin"))) {
+    if (
+      xFrameOptions &&
+      (xFrameOptions.toLowerCase().includes("deny") ||
+        xFrameOptions.toLowerCase().includes("sameorigin"))
+    ) {
       console.log("X-Frame-Options restricts embedding:", xFrameOptions);
       return false;
     }
 
-    if (contentSecurityPolicy &&
-        (contentSecurityPolicy.includes("frame-ancestors 'self'") || contentSecurityPolicy.includes("frame-ancestors 'none'"))) {
-      console.log("Content-Security-Policy restricts embedding:", contentSecurityPolicy);
+    if (
+      contentSecurityPolicy &&
+      (contentSecurityPolicy.includes("frame-ancestors 'self'") ||
+        contentSecurityPolicy.includes("frame-ancestors 'none'"))
+    ) {
+      console.log(
+        "Content-Security-Policy restricts embedding:",
+        contentSecurityPolicy
+      );
       return false;
     }
 
@@ -35,11 +45,18 @@ async function checkIfEmbeddable(url) {
       const headers = error.response.headers;
       const xFrameOptions = headers["x-frame-options"];
       const contentSecurityPolicy = headers["content-security-policy"];
-      if (xFrameOptions && (xFrameOptions.toLowerCase().includes("deny") || xFrameOptions.toLowerCase().includes("sameorigin"))) {
+      if (
+        xFrameOptions &&
+        (xFrameOptions.toLowerCase().includes("deny") ||
+          xFrameOptions.toLowerCase().includes("sameorigin"))
+      ) {
         return false;
       }
-      if (contentSecurityPolicy &&
-          (contentSecurityPolicy.includes("frame-ancestors 'self'") || contentSecurityPolicy.includes("frame-ancestors 'none'"))) {
+      if (
+        contentSecurityPolicy &&
+        (contentSecurityPolicy.includes("frame-ancestors 'self'") ||
+          contentSecurityPolicy.includes("frame-ancestors 'none'"))
+      ) {
         return false;
       }
     }
@@ -52,7 +69,7 @@ app.get("/proxy", async (req, res) => {
   const { urlTocheck } = req.query;
 
   const isValidURL = await checkIfEmbeddable(urlTocheck);
-  console.log(isValidURL)
+  console.log(isValidURL);
   if (urlTocheck && isValidURL) {
     return res.status(200).send();
   } else {
