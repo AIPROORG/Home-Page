@@ -100,7 +100,7 @@ function Window({
           <button
             className="close-button"
             onClick={() => onClose(id)}
-            style={{ position: "absolute", right: "5px", top: "5px" }}
+            style={{ position: "relative" }}
           >
             X
           </button>

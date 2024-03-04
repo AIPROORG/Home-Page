@@ -105,6 +105,11 @@ function App() {
               width={window.width}
               height={window.height}
               url={window.url}
+              onMove={(id, newX, newY) => {
+                console.log(
+                  `Window ${id} moved to new position: ${newX}, ${newY}`
+                );
+              }}
               onClose={onWindowClose}
               isEditMode={isEditMode}
             />

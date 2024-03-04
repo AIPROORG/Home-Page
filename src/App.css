@@ -13,6 +13,7 @@
 }
 
 .add-url-button {
+  margin-left: 1rem;
   padding: 0.6em 2em;
   border: none;
   outline: none;
@@ -110,22 +111,26 @@
 @media (min-width: 1601px) {
   .windows-container {
     grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
   }
 }
 
 @media (max-width: 600px) {
   .windows-container {
     grid-template-columns: repeat(1, 1fr);
+    justify-items: center;
   }
 }
 @media (min-width: 601px) and (max-width: 1000px) {
   .windows-container {
     grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
   }
 }
 @media (min-width: 1001px) {
   .windows-container {
     grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
   }
 }
 
@@ -152,6 +157,15 @@
 
 .non-embeddable-bar button {
   margin-right: 10px;
+  position: relative;
+  bottom: 40px;
+  background-color: #ff4545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
 }
 
 .top-part {
