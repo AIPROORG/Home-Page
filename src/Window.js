@@ -1,3 +1,4 @@
+// Window.js
 import React, { useState, useEffect, useCallback } from "react";
 import "./Window.css";
 
@@ -12,11 +13,11 @@ function Window({
   onResize,
   url,
   onClose,
+  isEditMode, // Această prop trebuie să fie pasată componentei Window
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizeHandle, setResizeHandle] = useState(null);
-  const [isValid, setIsValid] = useState(null); // Starea pentru validarea URL-ului
 
   const handleMouseMove = useCallback(
     (e) => {
@@ -79,13 +80,6 @@ function Window({
     [x, y]
   );
 
-  const handleResizeMouseDown = useCallback((e, handle) => {
-    e.preventDefault();
-    e.stopPropagation(); // Previne declanșarea evenimentelor părinte
-    setResizeHandle(handle);
-    setDragOffset({ x: e.clientX, y: e.clientY });
-  }, []);
-
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -95,71 +89,33 @@ function Window({
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  const checkURL = useCallback(async (url) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(url)}`
-      );
-      if (response.ok) {
-        setIsValid(true);
-      } else {
-        setIsValid(false);
-      }
-    } catch (error) {
-      console.error("Error fetching URL status:", error);
-      setIsValid(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (url) {
-      checkURL(url);
-    }
-  }, [url, checkURL]);
-
   return (
     <div
-      className="window-wrapper"
-      // style={{ left: x, top: y, width: width, height: height }}
+      className="window"
+      style={{ left: x, top: y, width: width, height: height }}
     >
       <div className="title-bar" onMouseDown={handleMouseDown}>
         {title}
-        <button className="close-button" onClick={onClose}>
-          X
-        </button>
-      </div>
-      <div className="content">
-        {isValid ? (
-          <iframe
-            src={url}
-            title={title}
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            allowFullScreen
-          ></iframe>
-        ) : (
-          <a href={url} target="_blank">
-            <input type="button"></input>
-          </a>
+        {isEditMode && (
+          <button
+            className="close-button"
+            onClick={() => onClose(id)}
+            style={{ position: "absolute", right: "5px", top: "5px" }}
+          >
+            X
+          </button>
         )}
       </div>
-      {[
-        "top",
-        "bottom",
-        "left",
-        "right",
-        "top-left",
-        "top-right",
-        "bottom-left",
-        "bottom-right",
-      ].map((handle) => (
-        <div
-          key={handle}
-          className={`window-resize window-resize-${handle}`}
-          onMouseDown={(e) => handleResizeMouseDown(e, handle)}
-        />
-      ))}
+      <div className="content">
+        <iframe
+          src={url}
+          title={title}
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          allowFullScreen
+        ></iframe>
+      </div>
     </div>
   );
 }

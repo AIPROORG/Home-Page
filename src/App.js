@@ -1,15 +1,25 @@
 import React, { useState } from "react";
 import Window from "./Window";
 import "./App.css";
+import GoogleSearch from "./GoogleSearch";
 
 function App() {
   const [windows, setWindows] = useState([]);
   const [nonEmbeddableUrls, setNonEmbeddableUrls] = useState([]);
   const [newUrl, setNewUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const addNewWindow = async () => {
     if (!newUrl) return;
+
+    const urlExists =
+      windows.some((window) => window.url === newUrl) ||
+      nonEmbeddableUrls.includes(newUrl);
+    if (urlExists) {
+      alert("Acest URL a fost deja adăugat.");
+      return;
+    }
 
     const newId = windows.length + nonEmbeddableUrls.length + 1;
     try {
@@ -20,8 +30,6 @@ function App() {
         const newWindow = {
           id: newId,
           title: `Fereastra ${newId}`,
-          x: 0,
-          y: 0,
           width: 300,
           height: 200,
           url: newUrl,
@@ -52,81 +60,74 @@ function App() {
     setShowInput(!showInput);
   };
 
-  const onWindowMove = (id, newX, newY) => {
-    setWindows(
-      windows.map((window) =>
-        window.id === id ? { ...window, x: newX, y: newY } : window
-      )
-    );
+  const toggleEditMode = (e) => {
+    e.preventDefault();
+    setIsEditMode(!isEditMode);
   };
 
-  const onWindowResize = (id, newWidth, newHeight, newX, newY) => {
-    setWindows(
-      windows.map((window) =>
-        window.id === id
-          ? { ...window, width: newWidth, height: newHeight, x: newX, y: newY }
-          : window
-      )
-    );
-  };
-
-  const onCloseWindow = (id) => {
+  const onWindowClose = (id) => {
     setWindows(windows.filter((window) => window.id !== id));
   };
 
+  const onIconClose = (url) => {
+    setNonEmbeddableUrls(nonEmbeddableUrls.filter((u) => u !== url));
+  };
+
   return (
-    <div className="app">
-      <div className="add-url-container">
-        <button className="add-url-button" onClick={toggleInput}>
-          +
-        </button>
-        {showInput && (
-          <div className="url-input-popup">
-            <input
-              type="text"
-              value={newUrl}
-              onChange={(e) => setNewUrl(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Introduceți URL-ul site-ului"
-              autoFocus
-            />
-          </div>
-        )}
+    <div className="app" onContextMenu={toggleEditMode}>
+      <div className="top-part">
+        <div className="add-url-container">
+          <button className="add-url-button" onClick={toggleInput}>
+            +
+          </button>
+          {showInput && (
+            <div className="url-input-popup">
+              <input
+                type="text"
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Introduceți URL-ul site-ului"
+                autoFocus
+              />
+            </div>
+          )}
+        </div>
+        <GoogleSearch />
       </div>
       <div className="iframe-grid-container">
         <div className="windows-container">
           {windows.map((window) => (
-            <div className="window-wrapper" key={window.id}>
-              <Window
-                id={window.id}
-                title={window.title}
-                x={window.x}
-                y={window.y}
-                width={window.width}
-                height={window.height}
-                url={window.url}
-                onMove={onWindowMove}
-                onResize={onWindowResize}
-                onClose={() => onCloseWindow(window.id)}
-              />
-            </div>
+            <Window
+              key={window.id}
+              id={window.id}
+              title={window.title}
+              width={window.width}
+              height={window.height}
+              url={window.url}
+              onClose={onWindowClose}
+              isEditMode={isEditMode}
+            />
           ))}
         </div>
       </div>
-      <div className="non-embeddable-bar">
-        {nonEmbeddableUrls.map((url, index) => (
-          <a key={index} href={url} target="_blank">
-            <img
-              src={
-                "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=" +
-                url +
-                "&size=64"
-              }
-              alt=""
-              style={{ height: "3rem", width: "3rem", marginRight: "5px" }}
-            />
-          </a>
-        ))}
+      <div className="bottom-part">
+        <div className="non-embeddable-bar">
+          {nonEmbeddableUrls.map((url, index) => (
+            <div key={index} className="non-embeddable-item">
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`}
+                  alt=""
+                  style={{ height: "3rem", width: "3rem", marginRight: "5px" }}
+                />
+              </a>
+              {isEditMode && (
+                <button onClick={() => onIconClose(url)}>X</button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
