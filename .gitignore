@@ -9,6 +9,7 @@ logs
 **/*.back.*
 
 node_modules
+package-lock.json
 bower_components
 
 *.sublime*

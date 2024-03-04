@@ -1,9 +1,16 @@
 /* Window.css */
 
+.widget-card {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 .close-button {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: -10px;
+  right: -13px;
   background-color: #ff4545;
   color: white;
   border: none;
@@ -17,22 +24,17 @@
   font-size: 12px;
   padding: 0;
   user-select: none;
+  z-index: 30;
 }
 
 .close-button:hover {
   background-color: #ff0000;
 }
 
-.title-bar .close-button {
-  top: 0;
-  right: 0;
-}
-
-.window {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+.window-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .title-bar {
@@ -41,7 +43,8 @@
   cursor: move;
   border-bottom: 1px solid #ccc;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
 }
 
 .content {

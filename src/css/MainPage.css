@@ -1,0 +1,250 @@
+/*************** CLASSES ***************/
+
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: url("../images/bg-homepage.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.highlighted-button {
+  margin-left: 1em;
+  padding: 0.6em 2em;
+  border: none;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.highlighted-button:not(.disabled-btn):before {
+  content: "";
+  background: linear-gradient(
+    45deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00c8,
+    #ff0000
+  );
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 400%;
+  z-index: -1;
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  animation: glowing-button-85 20s linear infinite;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+.highlighted-button:after {
+  z-index: -1;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #222;
+  left: 0;
+  top: 0;
+  border-radius: 10px;
+}
+
+.add-btn {
+  position: relative;
+  display: inline-block;
+}
+
+.disabled-btn {
+}
+
+.add-new-url-popup {
+  margin-left: 1em;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 10;
+  margin-top: 1rem;
+  border: 1px solid #ccc;
+  padding: 1em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 50px;
+  background: rgb(0, 0, 139);
+  background-image: linear-gradient(to right, #0083b0, #00b4db);
+}
+
+.add-new-url-input {
+  border-radius: 50px;
+  padding: 5px;
+}
+
+.widgets-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  flex-direction: row;
+  overflow-y: auto;
+}
+
+.windows-container {
+  display: grid;
+  column-gap: 3em;
+  row-gap: 1em;
+  padding: 25px;
+  width: 100%;
+  height: 80%;
+  align-items: stretch;
+  overflow: hidden;
+  grid-template-rows: 1fr max-content;
+}
+
+.non-embeddable-bar {
+  border-top: 1px solid #ccc;
+  padding: 1em;
+  min-height: 52px;
+  display: flex;
+  overflow-x: auto;
+  margin: 0 auto;
+  width: 80%;
+  border-radius: 20rem;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.non-embeddable-bar button {
+  position: absolute;
+  top: -10px;
+  right: -20px;
+  background-color: #ff4545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+.non-embeddable-item {
+  position: relative;
+  margin-right: 20px;
+}
+
+#___gcse_0 {
+  margin: 0 auto;
+  width: 50%;
+}
+.bottom-part {
+  margin: 1em 0;
+}
+
+.gsc-control-cse {
+  border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+form.gsc-search-box {
+  border-radius: 50px !important;
+  box-shadow: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+.gsc-input-box {
+  border: transparent !important;
+  border-bottom: 1px solid #ccc !important;
+  background-color: transparent !important;
+}
+
+#gsc-i-id1 {
+  background: transparent !important;
+}
+
+input.gsc-input::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  color: white;
+  padding-bottom: 0.5em;
+}
+
+.gsc-search-button-v2 {
+  border: transparent !important;
+  background: transparent !important;
+}
+
+.gsc-search-button-v2 svg {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.gsib_a {
+  padding: 1em 1em 1em 0 !important;
+}
+
+/*************** KEYFRAMES ***************/
+
+@keyframes glowing-button-85 {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/*************** MEDIA ***************/
+
+@media (min-width: 1601px) {
+  .windows-container {
+    grid-template-columns: repeat(4, 1fr);
+    /* justify-items: center; */
+  }
+}
+
+@media (max-width: 600px) {
+  .windows-container {
+    grid-template-columns: repeat(1, 1fr);
+    /* justify-items: center; */
+  }
+}
+@media (min-width: 601px) and (max-width: 1000px) {
+  .windows-container {
+    grid-template-columns: repeat(2, 1fr);
+    /* justify-items: center; */
+  }
+}
+@media (min-width: 1001px) {
+  .windows-container {
+    grid-template-columns: repeat(3, 1fr);
+    /* justify-items: center; */
+  }
+}
