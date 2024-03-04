@@ -31,7 +31,7 @@ const MainPage = () => {
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
-    if (active.id !== over.id && over) {
+    if (over && active.id !== over.id) {
       setWindows((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
