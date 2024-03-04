@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import Window from "./Window";
 import "./App.css";
 import GoogleSearch from "./GoogleSearch";
@@ -9,6 +17,23 @@ function App() {
   const [newUrl, setNewUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id && over) {
+      setWindows((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   const addNewWindow = async () => {
     if (!newUrl) return;
@@ -28,7 +53,7 @@ function App() {
       );
       if (response.ok) {
         const newWindow = {
-          id: newId,
+          id: newId.toString(),
           title: `Fereastra ${newId}`,
           width: 300,
           height: 200,
@@ -74,67 +99,70 @@ function App() {
   };
 
   return (
-    <div className="app" onContextMenu={toggleEditMode}>
-      <div className="top-part">
-        <div className="add-url-container">
-          <button className="add-url-button" onClick={toggleInput}>
-            +
-          </button>
-          {showInput && (
-            <div className="url-input-popup">
-              <input
-                type="text"
-                value={newUrl}
-                onChange={(e) => setNewUrl(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Introduceți URL-ul site-ului"
-                autoFocus
-              />
-            </div>
-          )}
-        </div>
-        <GoogleSearch />
-      </div>
-      <div className="iframe-grid-container">
-        <div className="windows-container">
-          {windows.map((window) => (
-            <Window
-              key={window.id}
-              id={window.id}
-              title={window.title}
-              width={window.width}
-              height={window.height}
-              url={window.url}
-              onMove={(id, newX, newY) => {
-                console.log(
-                  `Window ${id} moved to new position: ${newX}, ${newY}`
-                );
-              }}
-              onClose={onWindowClose}
-              isEditMode={isEditMode}
-            />
-          ))}
-        </div>
-      </div>
-      <div className="bottom-part">
-        <div className="non-embeddable-bar">
-          {nonEmbeddableUrls.map((url, index) => (
-            <div key={index} className="non-embeddable-item">
-              <a href={url} target="_blank" rel="noopener noreferrer">
-                <img
-                  src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`}
-                  alt=""
-                  style={{ height: "3rem", width: "3rem", marginRight: "5px" }}
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="app" onContextMenu={toggleEditMode}>
+        <div className="top-part">
+          <div className="add-url-container">
+            <button className="add-url-button" onClick={toggleInput}>
+              +
+            </button>
+            {showInput && (
+              <div className="url-input-popup">
+                <input
+                  type="text"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Introduceți URL-ul site-ului"
+                  autoFocus
                 />
-              </a>
-              {isEditMode && (
-                <button onClick={() => onIconClose(url)}>X</button>
-              )}
+              </div>
+            )}
+          </div>
+          <GoogleSearch />
+        </div>
+        <SortableContext items={windows.map((window) => window.id)}>
+          <div className="iframe-grid-container">
+            <div className="windows-container">
+              {windows.map((window) => (
+                <Window
+                  key={window.id}
+                  id={window.id}
+                  title={window.title}
+                  width={window.width}
+                  height={window.height}
+                  url={window.url}
+                  onClose={onWindowClose}
+                  isEditMode={isEditMode}
+                />
+              ))}
             </div>
-          ))}
+          </div>
+        </SortableContext>
+        <div className="bottom-part">
+          <div className="non-embeddable-bar">
+            {nonEmbeddableUrls.map((url, index) => (
+              <div key={index} className="non-embeddable-item">
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`}
+                    alt=""
+                    style={{
+                      height: "3rem",
+                      width: "3rem",
+                      marginRight: "5px",
+                    }}
+                  />
+                </a>
+                {isEditMode && (
+                  <button onClick={() => onIconClose(url)}>X</button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </DndContext>
   );
 }
 
