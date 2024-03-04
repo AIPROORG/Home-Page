@@ -41,7 +41,7 @@ const Window = ({ id, title, url, onClose, isEditMode }) => {
         {...listeners}
         className="window-content"
       >
-        <div className="title-bar">
+        <div className={`title-bar ${isEditMode ? "title-bar-draggable" : ""}`}>
           <p>{title}</p>
         </div>
         <div className="content">
