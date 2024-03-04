@@ -174,4 +174,38 @@
 
 form.gsc-search-box {
   border-radius: 50px !important;
+  box-shadow: none !important;
+  background: none !important;
+  border: none !important;
+}
+
+.gsc-input-box {
+  border: transparent !important;
+  border-bottom: 1px solid #ccc !important;
+  background-color: transparent !important;
+}
+
+#gsc-i-id1 {
+  background: transparent !important;
+}
+
+input.gsc-input::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  color: white;
+  padding-bottom: 0.5em;
+}
+
+.gsc-search-button-v2 {
+  border: transparent !important;
+  background: transparent !important;
+}
+
+.gsc-search-button-v2 svg {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+.gsib_a {
+  padding: 1em 1em 1em 0 !important;
 }

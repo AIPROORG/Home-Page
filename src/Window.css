@@ -45,7 +45,6 @@
   overflow: hidden;
 }
 
-/* Stilizare pentru cursor la colțurile ferestrei pentru redimensionare */
 .window-resize {
   position: absolute;
   width: 10px;
