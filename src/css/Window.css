@@ -38,9 +38,11 @@
 }
 
 .title-bar {
-  background-color: #f0f0f0;
-  padding: 5px;
-  border-bottom: 1px solid #ccc;
+  background-color: #8634eb;
+  box-shadow: 10px 10px 5px rgb(181, 73, 173) inset;
+  opacity: 0.5;
+  /* padding: 5px; */
+  border-bottom: 0.5px solid #ccc;
   display: flex;
   justify-content: center;
   align-items: center;

@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: url("../images/bg-homepage.jpg");
+  /* background: url("../images/bg-homepage.jpg"); */
   background-size: cover;
   background-repeat: no-repeat;
   overflow: hidden;
@@ -13,6 +13,7 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .header-actions {
@@ -81,9 +82,6 @@
   display: inline-block;
 }
 
-.disabled-btn {
-}
-
 .add-new-url-popup {
   margin-left: 1em;
   position: absolute;
@@ -91,17 +89,28 @@
   top: 100%;
   z-index: 10;
   margin-top: 1rem;
-  border: 1px solid #ccc;
   padding: 1em;
+  width: 40rem;
+  height: 50rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  border-radius: 50px;
+  border-radius: 20px;
   background: rgb(0, 0, 139);
-  background-image: linear-gradient(to right, #0083b0, #00b4db);
+  background-image: linear-gradient(to right, #3aa4c7, #025264);
+  border: 1px solid #ccc;
+}
+
+.label {
+  color: #dadada;
+  font-weight: 600;
 }
 
 .add-new-url-input {
-  border-radius: 50px;
-  padding: 5px;
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+  box-sizing: border-box;
 }
 
 .widgets-container {
@@ -127,21 +136,35 @@
 }
 
 .non-embeddable-bar {
-  border-top: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1em;
   min-height: 52px;
-  display: flex;
-  overflow-x: auto;
-  margin: 0 auto;
   width: 80%;
-  border-radius: 20rem;
+  margin: 0 auto;
   background: rgba(255, 255, 255, 0.25);
+  border-radius: 20rem;
+  border-top: 1px solid #ccc;
+  overflow-x: auto;
+}
+
+.vertical-divider {
+  height: 30px;
+  width: 1px;
+  background-color: #ccc;
+  margin: 0 12px;
+}
+
+.settings-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
 }
 
 .non-embeddable-bar button {
-  position: absolute;
-  top: -10px;
-  right: -20px;
   background-color: #ff4545;
   color: white;
   border: none;
@@ -151,9 +174,16 @@
   cursor: pointer;
 }
 
+.icon-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
 .non-embeddable-item {
-  position: relative;
   margin-right: 20px;
+  display: flex;
+  align-items: center;
 }
 
 #___gcse_0 {
@@ -207,6 +237,76 @@ input.gsc-input::-webkit-input-placeholder {
   padding: 1em 1em 1em 0 !important;
 }
 
+.background-selector-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  max-width: 600px;
+  height: 70%;
+  padding: 1em;
+  background: linear-gradient(to right, purple, blue);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  z-index: 1050;
+  opacity: 0.7;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.background-option {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  margin: 10px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.background-option.selected {
+  border-color: blue;
+}
+
+.background-option img {
+  width: 100%;
+  height: 100%;
+  /* border-radius: 50%; */
+  object-fit: cover;
+}
+
+.background-option.selected::after {
+  content: "✓";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: green;
+  color: white;
+  text-align: center;
+  line-height: 20px;
+  font-size: 14px;
+}
+
+.ok-button {
+  padding: 10px 20px;
+  margin-top: 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 /*************** KEYFRAMES ***************/
 
 @keyframes glowing-button-85 {
@@ -226,25 +326,23 @@ input.gsc-input::-webkit-input-placeholder {
 @media (min-width: 1601px) {
   .windows-container {
     grid-template-columns: repeat(4, 1fr);
-    /* justify-items: center; */
   }
 }
 
 @media (max-width: 600px) {
   .windows-container {
     grid-template-columns: repeat(1, 1fr);
-    /* justify-items: center; */
   }
 }
+
 @media (min-width: 601px) and (max-width: 1000px) {
   .windows-container {
     grid-template-columns: repeat(2, 1fr);
-    /* justify-items: center; */
   }
 }
+
 @media (min-width: 1001px) {
   .windows-container {
     grid-template-columns: repeat(3, 1fr);
-    /* justify-items: center; */
   }
 }
