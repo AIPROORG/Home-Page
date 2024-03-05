@@ -91,17 +91,25 @@
   top: 100%;
   z-index: 10;
   margin-top: 1rem;
-  border: 1px solid #ccc;
   padding: 1em;
+  width: 40rem;
+  height: 50rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  border-radius: 50px;
+  border-radius: 20px;
   background: rgb(0, 0, 139);
-  background-image: linear-gradient(to right, #0083b0, #00b4db);
+  background-image: linear-gradient(to right, #3aa4c7, #025264);
 }
-
+.label {
+  color: #dadada;
+  font-weight: 600;
+}
 .add-new-url-input {
-  border-radius: 50px;
-  padding: 5px;
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+  box-sizing: border-box;
 }
 
 .widgets-container {

@@ -43,42 +43,51 @@ const MainPage = () => {
   const handleAddNewWindow = async () => {
     if (!newUrl) return;
 
+    let modifiedUrl = newUrl;
+
+    // Check if the newUrl already has http:// or https://
+    if (!modifiedUrl.startsWith("http://") && !modifiedUrl.startsWith("https://")) {
+        // If not, prepend "https://"
+        modifiedUrl = "https://" + modifiedUrl;
+    }
+
     const urlExists =
-      windows.some((window) => window.url === newUrl) ||
-      nonEmbeddableUrls.includes(newUrl);
+        windows.some((window) => window.url === modifiedUrl) ||
+        nonEmbeddableUrls.includes(modifiedUrl);
     if (urlExists) {
-      alert("Acest URL a fost deja adăugat.");
-      return;
+        alert("Acest URL a fost deja adăugat.");
+        return;
     }
 
     const newId = windows.length + nonEmbeddableUrls.length + 1;
     try {
-      const response = await fetch(
-        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(newUrl)}`
-      );
-      if (response.ok) {
-        const newWindow = {
-          id: newId.toString(),
-          title: `Fereastra ${newId}`,
-          width: 300,
-          height: 200,
-          url: newUrl,
-        };
-        setWindows([...windows, newWindow]);
-      } else {
-        if (!nonEmbeddableUrls.includes(newUrl)) {
-          setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
+        const response = await fetch(
+            `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(modifiedUrl)}`
+        );
+        if (response.ok) {
+            const newWindow = {
+                id: newId.toString(),
+                title: `Fereastra ${newId}`,
+                width: 300,
+                height: 200,
+                url: modifiedUrl,
+            };
+            setWindows([...windows, newWindow]);
+        } else {
+            if (!nonEmbeddableUrls.includes(modifiedUrl)) {
+                setNonEmbeddableUrls([...nonEmbeddableUrls, modifiedUrl]);
+            }
         }
-      }
     } catch (error) {
-      console.error("Error checking URL embeddability:", error);
-      if (!nonEmbeddableUrls.includes(newUrl)) {
-        setNonEmbeddableUrls([...nonEmbeddableUrls, newUrl]);
-      }
+        console.error("Error checking URL embeddability:", error);
+        if (!nonEmbeddableUrls.includes(modifiedUrl)) {
+            setNonEmbeddableUrls([...nonEmbeddableUrls, modifiedUrl]);
+        }
     }
     setShowInput(false);
     setNewUrl("");
-  };
+};
+
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -129,15 +138,71 @@ const MainPage = () => {
             </button>
             {showInput && (
               <div className="add-new-url-popup">
+                <label htmlFor="" className="form-label text-white fw-bold">Adaugă un shortcut sau o fereastră nouă</label>
                 <input
-                  className="add-new-url-input"
-                  type="text"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Introduceți URL-ul site-ului"
-                  autoFocus
+                    className="add-new-url-input form-control"
+                    type="text"
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Introduceți URL-ul site-ului"
+                    autoFocus
                 />
+
+                <div className="row mt-1">
+                  <div className="col-md-1">
+                    <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.youtube.com&size=64`}
+                        alt=""
+                        style={{
+                          height: "3rem",
+                          width: "3rem",
+                          marginRight: "5px",
+                        }}
+                      />
+                    </a>
+                  </div>
+                  <div className="col-md-1">
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.facebook.com&size=64`}
+                        alt=""
+                        style={{
+                          height: "3rem",
+                          width: "3rem",
+                          marginRight: "5px",
+                        }}
+                      />
+                    </a>
+                  </div>
+                  <div className="col-md-1">
+                    <a href="https://www.netflix.com" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.netflix.com&size=64`}
+                        alt=""
+                        style={{
+                          height: "3rem",
+                          width: "3rem",
+                          marginRight: "5px",
+                        }}
+                      />
+                    </a>
+                  </div>
+                  <div className="col-md-1">
+                    <a href="https://www.aipro.ro" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://aipro.ro&size=64`}
+                        alt=""
+                        style={{
+                          height: "3rem",
+                          width: "3rem",
+                          marginRight: "5px",
+                        }}
+                      />
+                    </a>
+                  </div>
+                </div>
               </div>
             )}
           </div>
