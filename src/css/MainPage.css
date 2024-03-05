@@ -96,14 +96,17 @@
   border-radius: 20px;
   background: rgb(0, 0, 139);
   background-image: linear-gradient(to right, #3aa4c7, #025264);
+<<<<<<< HEAD
   border: 1px solid #ccc;
 }
 
+=======
+}
+>>>>>>> e8c5b5728eaef71fc47895af7ef94a15d70ff3fb
 .label {
   color: #dadada;
   font-weight: 600;
 }
-
 .add-new-url-input {
   width: 100%;
   padding: 12px 20px;
