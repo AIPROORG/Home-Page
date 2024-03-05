@@ -1,0 +1,55 @@
+.Menu-container {
+  height: 30px;
+  width: 30px;
+  cursor: pointer;
+  margin: 10% auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: hidden;
+}
+
+.line {
+  position: absolute;
+  height: 5px;
+  width: 30px;
+  background-color: black;
+  transition: 0.4s ease;
+}
+
+/* it hides the checkbox*/
+#Toggle {
+  display: none;
+}
+
+.line::before {
+  content: "";
+  position: absolute;
+  height: 5px;
+  width: 30px;
+  background-color: black;
+  top: -8px;
+  transition: 0.4s ease;
+}
+
+.line::after {
+  content: "";
+  position: absolute;
+  height: 5px;
+  width: 30px;
+  background-color: black;
+  top: 8px;
+}
+
+#Toggle:checked + label #active {
+  transform: rotate(45deg);
+}
+
+#Toggle:checked + label #active::before {
+  transform: rotate(-90deg) translateX(-8px);
+}
+
+#Toggle:checked + label #active::after {
+  display: none;
+}

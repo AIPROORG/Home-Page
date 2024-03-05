@@ -14,6 +14,7 @@ import bg1 from "../images/bg1.jpg";
 import bg2 from "../images/bg2.jpg";
 import bg3 from "../images/bg3.jpg";
 import "../css/MainPage.css";
+import "../css/HideShow.css";
 
 const MainPage = () => {
   const [windows, setWindows] = useState([]);
@@ -23,10 +24,17 @@ const MainPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState(bgHomepage);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
+  const [isIconBarVisible, setIsIconBarVisible] = useState(false);
 
-  const windowsIds = useMemo(() => windows.map((window) => window.id), [windows]);
+  const windowsIds = useMemo(
+    () => windows.map((window) => window.id),
+    [windows]
+  );
 
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  );
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -43,11 +51,16 @@ const MainPage = () => {
     if (!newUrl) return;
 
     let modifiedUrl = newUrl;
-    if (!modifiedUrl.startsWith("http://") && !modifiedUrl.startsWith("https://")) {
+    if (
+      !modifiedUrl.startsWith("http://") &&
+      !modifiedUrl.startsWith("https://")
+    ) {
       modifiedUrl = "https://" + modifiedUrl;
     }
 
-    const urlExists = windows.some((window) => window.url === modifiedUrl) || nonEmbeddableUrls.includes(modifiedUrl);
+    const urlExists =
+      windows.some((window) => window.url === modifiedUrl) ||
+      nonEmbeddableUrls.includes(modifiedUrl);
     if (urlExists) {
       alert("Acest URL a fost deja adăugat.");
       return;
@@ -55,7 +68,11 @@ const MainPage = () => {
 
     const newId = windows.length + nonEmbeddableUrls.length + 1;
     try {
-      const response = await fetch(`http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(modifiedUrl)}`);
+      const response = await fetch(
+        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(
+          modifiedUrl
+        )}`
+      );
       if (response.ok) {
         const newWindow = {
           id: newId.toString(),
@@ -96,7 +113,9 @@ const MainPage = () => {
   };
 
   const removeWindowHandler = (id) => {
-    setWindows((prevWindows) => prevWindows.filter((window) => window.id !== id));
+    setWindows((prevWindows) =>
+      prevWindows.filter((window) => window.id !== id)
+    );
   };
 
   const removeIconHandler = (url) => {
@@ -105,25 +124,49 @@ const MainPage = () => {
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="root" style={{ backgroundImage: `url(${selectedBackground})` }}>
+      <div
+        className="root"
+        style={{ backgroundImage: `url(${selectedBackground})` }}
+      >
         <div className="header">
           <div className="header-actions">
-            <button className="highlighted-button add-btn" onClick={handleToggleInput}>+</button>
-            <button className={`highlighted-button ${nonEmbeddableUrls.length === 0 && windows.length === 0 ? "disabled-btn" : ""}`}
-                    disabled={nonEmbeddableUrls.length === 0 && windows.length === 0}
-                    onClick={handleToggleEditMode}>
+            <button
+              className="highlighted-button add-btn"
+              onClick={handleToggleInput}
+            >
+              +
+            </button>
+            <button
+              className={`highlighted-button ${
+                nonEmbeddableUrls.length === 0 && windows.length === 0
+                  ? "disabled-btn"
+                  : ""
+              }`}
+              disabled={nonEmbeddableUrls.length === 0 && windows.length === 0}
+              onClick={handleToggleEditMode}
+            >
               Edit
+            </button>
+            <button
+              className="highlighted-button"
+              onClick={() => setShowBackgroundSelector(!showBackgroundSelector)}
+            >
+              ⚙️
             </button>
             {showInput && (
               <div className="add-new-url-popup">
-                <label htmlFor="" className="form-label text-white fw-bold">Adaugă un shortcut sau o fereastră nouă</label>
-                <input className="add-new-url-input form-control"
-                       type="text"
-                       value={newUrl}
-                       onChange={(e) => setNewUrl(e.target.value)}
-                       onKeyDown={handleKeyPress}
-                       placeholder="Introduceți URL-ul site-ului"
-                       autoFocus />
+                <label htmlFor="" className="form-label text-white fw-bold">
+                  Adaugă un shortcut sau o fereastră nouă
+                </label>
+                <input
+                  className="add-new-url-input form-control"
+                  type="text"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Introduceți URL-ul site-ului"
+                  autoFocus
+                />
               </div>
             )}
           </div>
@@ -133,47 +176,80 @@ const MainPage = () => {
           <div className="widgets-container">
             <div className="windows-container">
               {windows.map((window) => (
-                <Window key={window.id}
-                        id={window.id}
-                        title={window.title}
-                        width={window.width}
-                        height={window.height}
-                        url={window.url}
-                        onClose={removeWindowHandler}
-                        isEditMode={isEditMode} />
+                <Window
+                  key={window.id}
+                  id={window.id}
+                  title={window.title}
+                  width={window.width}
+                  height={window.height}
+                  url={window.url}
+                  onClose={removeWindowHandler}
+                  isEditMode={isEditMode}
+                />
               ))}
             </div>
           </div>
         </SortableContext>
         <div className="bottom-part">
-          <div className="non-embeddable-bar">
-            <div className="icon-container">
-              {nonEmbeddableUrls.map((url, index) => (
-                <div key={index} className="non-embeddable-item">
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    <img src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`}
-                         alt=""
-                         style={{ height: "3rem", width: "3rem", marginRight: "5px" }} />
-                  </a>
-                  {isEditMode && <button onClick={() => removeIconHandler(url)}>X</button>}
-                </div>
-              ))}
-            </div>
-            <div>
-              <div className="vertical-divider"></div>
-              <button className="settings-button" onClick={() => setShowBackgroundSelector(!showBackgroundSelector)}>⚙️</button>
-            </div>
+          {/* hamburger menu */}
+          <div>
+            <input
+              type="checkbox"
+              id="Toggle"
+              onChange={() => setIsIconBarVisible(!isIconBarVisible)}
+              style={{ display: "none" }}
+            />
+
+            <label for="Toggle">
+              <div class="Menu-container">
+                <div class="line" id="active"></div>
+              </div>
+            </label>
           </div>
+          {isIconBarVisible && (
+            <div className="non-embeddable-bar">
+              <div className="icon-container">
+                {nonEmbeddableUrls.map((url, index) => (
+                  <div key={index} className="non-embeddable-item">
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${url}&size=64`}
+                        alt=""
+                        style={{
+                          height: "3rem",
+                          width: "3rem",
+                          marginRight: "5px",
+                        }}
+                      />
+                    </a>
+                    {isEditMode && (
+                      <button onClick={() => removeIconHandler(url)}>X</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {showBackgroundSelector && (
             <div className="background-selector-popup">
               {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => (
-                <div key={index}
-                     className={`background-option ${selectedBackground === bgImage ? "selected" : ""}`}
-                     onClick={() => setSelectedBackground(bgImage)}>
+                <div
+                  key={index}
+                  className={`background-option ${
+                    selectedBackground === bgImage ? "selected" : ""
+                  }`}
+                  onClick={() => setSelectedBackground(bgImage)}
+                >
                   <img src={bgImage} alt={`Background ${index}`} />
                 </div>
               ))}
-              <button className="ok-button" onClick={() => setShowBackgroundSelector(false)}>OK</button>
+              <button
+                className="ok-button"
+                onClick={() => setShowBackgroundSelector(false)}
+              >
+                OK
+              </button>
             </div>
           )}
         </div>

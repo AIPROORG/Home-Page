@@ -186,6 +186,19 @@
   align-items: center;
 }
 
+.non-embeddable-bar.hidden {
+  display: none;
+}
+
+.icon-bar-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  z-index: 100;
+}
+
 #___gcse_0 {
   margin: 0 auto;
   width: 50%;
