@@ -1,0 +1,26 @@
+/* Iframe.css */
+.window-content {
+    position: relative;
+  }
+  
+  .title-bar {
+    background-color: #007bff;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+  }
+  
+  .title-bar-draggable {
+    cursor: move;
+  }
+  
+  .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 0;
+    right: 0;
+    background: url("data:image/svg+xml;charset=utf8,%3Csvg fill='none' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='rgba(0, 0, 0, 0.5)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h16M4 16h16' /%3E%3C/svg%3E") center no-repeat;
+    cursor: nwse-resize;
+  }
+  
