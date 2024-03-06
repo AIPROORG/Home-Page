@@ -1,15 +1,21 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import Iframe from "../components/Iframe"; // Adjust the path as necessary
 import { GoogleSearch } from "../components";
-
+// import  Step1Login  from "../auth/SocialAuth";
+import storageComunicator from "../utils/storageComunication";
+import { BrowserRouter as Router } from 'react-router-dom';
 import bgHomepage from "../images/bg-homepage.jpg";
+import BgImageUpload from "../components/BgImageUpload";
 import bg1 from "../images/bg1.jpg";
 import bg2 from "../images/bg2.jpg";
 import bg3 from "../images/bg3.jpg";
 import "../css/MainPage.css";
 import "../css/HideShow.css";
+import { endpoints } from "../utils/endpoints";
+import axios from "axios";
+import userEvent from "@testing-library/user-event";
 
 const MainPage = () => {
   const [windows, setWindows] = useState([]);
@@ -20,10 +26,14 @@ const MainPage = () => {
   const [selectedBackground, setSelectedBackground] = useState(bgHomepage);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [isIconBarVisible, setIsIconBarVisible] = useState(false);
+  const [bgImages, setBgImages] = useState([]);
 
   const windowsIds = useMemo(() => windows.map((window) => window.id), [windows]);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
+  
+  let authTokens = storageComunicator.authToken.get()
+  
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -80,8 +90,51 @@ const MainPage = () => {
     setNonEmbeddableUrls(nonEmbeddableUrls.filter(u => u !== url));
   };
 
+  const fetchImages = async (axios) => {
+    // Your axios request logic here
+    try {
+      const response = await axios.get(endpoints.home_page.get_bg_images,{
+        headers: {
+          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
+        }
+      });
+      // console.log('get photos successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting images:', error);
+    }
+  };
+
+  const removeImage = async (imageId) => {
+    // Your axios request logic here
+    if (bgImages.length === 1) return
+
+    try {
+      const response = await axios.post(endpoints.home_page.remove_bg_image, {
+        image_id: imageId
+      },{
+        headers: {
+          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
+        }
+      });
+      console.log('remove image successful:', response.data);
+      setBgImages(response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error removing image:', error);
+    }
+  };
+
+  useEffect( async () => {
+    let images_data = await fetchImages(axios);
+    console.log('imagesData:', images_data);
+    setBgImages(images_data);
+
+  }, []);
+
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+
       <div className="root" style={{ backgroundImage: `url(${selectedBackground})` }}>
         <div className="header">
           <div className="header-actions">
@@ -154,15 +207,17 @@ const MainPage = () => {
           )}
           {showBackgroundSelector && (
             <div className="background-selector-popup">
-              {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => (
+              {/* {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => ( */}
+              {bgImages.map((bgImage, index) => (
                 <div
                   key={index}
-                  className={`background-option ${
+                  className={`background-option relative ${
                     selectedBackground === bgImage ? "selected" : ""
                   }`}
-                  onClick={() => setSelectedBackground(bgImage)}
+                  onClick={() => setSelectedBackground(bgImage.image)}
                 >
-                  <img src={bgImage} alt={`Background ${index}`} />
+                  <button className="absolute -top-10 p-0.5 px-2 bg-red-500 rounded-full text-white" onClick={() => {removeImage(bgImage.id)}}>X</button>
+                  <img src={bgImage.image} alt={`Background ${index}`} />
                 </div>
               ))}
               <button
@@ -171,6 +226,8 @@ const MainPage = () => {
               >
                 OK
               </button>
+
+              <BgImageUpload setBgImages={[bgImages,setBgImages]}  />
             </div>
           )}
         </div>
