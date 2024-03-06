@@ -1,13 +1,8 @@
 import React, { useMemo, useState } from "react";
-import {
-  DndContext,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  KeyboardSensor,
-} from "@dnd-kit/core";
+import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import { Window, GoogleSearch } from "../components";
+import Iframe from "../components/Iframe"; // Adjust the path as necessary
+import { GoogleSearch } from "../components";
 
 import bgHomepage from "../images/bg-homepage.jpg";
 import bg1 from "../images/bg1.jpg";
@@ -26,15 +21,8 @@ const MainPage = () => {
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [isIconBarVisible, setIsIconBarVisible] = useState(false);
 
-  const windowsIds = useMemo(
-    () => windows.map((window) => window.id),
-    [windows]
-  );
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor)
-  );
+  const windowsIds = useMemo(() => windows.map((window) => window.id), [windows]);
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -47,58 +35,31 @@ const MainPage = () => {
     }
   };
 
-  const handleAddNewWindow = async () => {
+  const handleAddNewWindow = () => {
     if (!newUrl) return;
-
     let modifiedUrl = newUrl;
-    if (
-      !modifiedUrl.startsWith("http://") &&
-      !modifiedUrl.startsWith("https://")
-    ) {
+    if (!modifiedUrl.startsWith("http://") && !modifiedUrl.startsWith("https://")) {
       modifiedUrl = "https://" + modifiedUrl;
     }
-
-    const urlExists =
-      windows.some((window) => window.url === modifiedUrl) ||
-      nonEmbeddableUrls.includes(modifiedUrl);
+    const urlExists = windows.some(window => window.url === modifiedUrl);
     if (urlExists) {
-      alert("Acest URL a fost deja adăugat.");
+      alert("URL already added.");
       return;
     }
-
-    const newId = windows.length + nonEmbeddableUrls.length + 1;
-    try {
-      const response = await fetch(
-        `http://localhost:3001/proxy?urlTocheck=${encodeURIComponent(
-          modifiedUrl
-        )}`
-      );
-      if (response.ok) {
-        const newWindow = {
-          id: newId.toString(),
-          title: `Fereastra ${newId}`,
-          width: 300,
-          height: 200,
-          url: modifiedUrl,
-        };
-        setWindows([...windows, newWindow]);
-      } else {
-        if (!nonEmbeddableUrls.includes(modifiedUrl)) {
-          setNonEmbeddableUrls([...nonEmbeddableUrls, modifiedUrl]);
-        }
-      }
-    } catch (error) {
-      console.error("Error checking URL embeddability:", error);
-      if (!nonEmbeddableUrls.includes(modifiedUrl)) {
-        setNonEmbeddableUrls([...nonEmbeddableUrls, modifiedUrl]);
-      }
-    }
+    const newWindow = {
+      id: `window-${windows.length + 1}`,
+      title: `Window ${windows.length + 1}`,
+      width: 300,
+      height: 200,
+      url: modifiedUrl,
+    };
+    setWindows([...windows, newWindow]);
     setShowInput(false);
     setNewUrl("");
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleAddNewWindow();
     }
   };
@@ -107,66 +68,29 @@ const MainPage = () => {
     setShowInput(!showInput);
   };
 
-  const handleToggleEditMode = (e) => {
-    e.preventDefault();
+  const handleToggleEditMode = () => {
     setIsEditMode(!isEditMode);
   };
 
   const removeWindowHandler = (id) => {
-    setWindows((prevWindows) =>
-      prevWindows.filter((window) => window.id !== id)
-    );
+    setWindows(windows.filter(window => window.id !== id));
   };
 
   const removeIconHandler = (url) => {
-    setNonEmbeddableUrls((prevIcons) => prevIcons.filter((u) => u !== url));
+    setNonEmbeddableUrls(nonEmbeddableUrls.filter(u => u !== url));
   };
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div
-        className="root"
-        style={{ backgroundImage: `url(${selectedBackground})` }}
-      >
+      <div className="root" style={{ backgroundImage: `url(${selectedBackground})` }}>
         <div className="header">
           <div className="header-actions">
-            <button
-              className="highlighted-button add-btn"
-              onClick={handleToggleInput}
-            >
-              +
-            </button>
-            <button
-              className={`highlighted-button ${
-                nonEmbeddableUrls.length === 0 && windows.length === 0
-                  ? "disabled-btn"
-                  : ""
-              }`}
-              disabled={nonEmbeddableUrls.length === 0 && windows.length === 0}
-              onClick={handleToggleEditMode}
-            >
-              Edit
-            </button>
-            <button
-              className="highlighted-button"
-              onClick={() => setShowBackgroundSelector(!showBackgroundSelector)}
-            >
-              ⚙️
-            </button>
+            <button className="highlighted-button add-btn" onClick={handleToggleInput}>+</button>
+            <button className={`highlighted-button ${nonEmbeddableUrls.length === 0 && windows.length === 0 ? "disabled-btn" : ""}`} disabled={nonEmbeddableUrls.length === 0 && windows.length === 0} onClick={handleToggleEditMode}>Edit</button>
+            <button className="highlighted-button" onClick={() => setShowBackgroundSelector(!showBackgroundSelector)}>⚙️</button>
             {showInput && (
               <div className="add-new-url-popup">
-                <label htmlFor="" className="form-label text-white fw-bold">
-                  Adaugă un shortcut sau o fereastră nouă
-                </label>
-                <input
-                  className="add-new-url-input form-control"
-                  type="text"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Introduceți URL-ul site-ului"
-                  autoFocus
-                />
+                <input className="add-new-url-input form-control" type="text" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} onKeyDown={handleKeyPress} placeholder="Introduceți URL-ul site-ului" autoFocus />
               </div>
             )}
           </div>
@@ -176,7 +100,7 @@ const MainPage = () => {
           <div className="widgets-container">
             <div className="windows-container">
               {windows.map((window) => (
-                <Window
+                <Iframe
                   key={window.id}
                   id={window.id}
                   title={window.title}
@@ -191,7 +115,6 @@ const MainPage = () => {
           </div>
         </SortableContext>
         <div className="bottom-part">
-          {/* hamburger menu */}
           <div>
             <input
               type="checkbox"
@@ -199,10 +122,9 @@ const MainPage = () => {
               onChange={() => setIsIconBarVisible(!isIconBarVisible)}
               style={{ display: "none" }}
             />
-
-            <label for="Toggle">
-              <div class="Menu-container">
-                <div class="line" id="active"></div>
+            <label htmlFor="Toggle">
+              <div className="Menu-container">
+                <div className="line" id="active"></div>
               </div>
             </label>
           </div>
@@ -230,7 +152,6 @@ const MainPage = () => {
               </div>
             </div>
           )}
-
           {showBackgroundSelector && (
             <div className="background-selector-popup">
               {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => (
@@ -256,6 +177,7 @@ const MainPage = () => {
       </div>
     </DndContext>
   );
+  
 };
 
 export default MainPage;
