@@ -1,61 +1,71 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import Iframe from "../components/Iframe"; // Adjust the path as necessary
-import { GoogleSearch } from "../components";
-import Pagination from "../components/Pagination";
-import storageComunicator from "../utils/storageComunication";
+import { BrowserRouter as Router } from 'react-router-dom';
 import axios from "axios";
+
+import { GoogleSearch, } from "../components";
+import BgImageUpload from "../components/BgImageUpload";
+import HomepageGrid from "../components/HomepageGrid";
+
+import storageComunicator from "../utils/storageComunication";
+import { endpoints } from "../utils/endpoints";
+
+import bgHomepage from "../images/bg-homepage.jpg";
 import "../css/MainPage.css";
 import "../css/HideShow.css";
-import { endpoints } from "../utils/endpoints";
-import BgImageUpload from "../components/BgImageUpload";
 
 const MainPage = () => {
-  const [windows, setWindows] = useState(() => {
-    const savedWindows = localStorage.getItem("windows");
-    return savedWindows ? JSON.parse(savedWindows) : [];
-  });
+  const [windows, setWindows] = useState([]);
   const [nonEmbeddableUrls, setNonEmbeddableUrls] = useState([]);
   const [newUrl, setNewUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedBackground, setSelectedBackground] = useState();
+  const [selectedBackground, setSelectedBackground] = useState(bgHomepage);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [isIconBarVisible, setIsIconBarVisible] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [bgImages, setBgImages] = useState([]);
-  const iframesPerPage = 2;
-  const totalPages = Math.ceil(windows.length / iframesPerPage);
 
-  const indexOfLastIframe = currentPage * iframesPerPage;
-  const indexOfFirstIframe = indexOfLastIframe - iframesPerPage;
-  const currentIframes = windows.slice(indexOfFirstIframe, indexOfLastIframe);
-
-  const windowsIds = useMemo(() => windows.map((window) => window.id), [windows]);
+  const windowsIds = useMemo(() => windows.map(window => window.id), [windows]);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
-  useEffect(() => {
-    localStorage.setItem("windows", JSON.stringify(windows));
-  }, [windows]);
-
-  useEffect(async () => {
-    let images_data = await fetchImages(axios);
-    console.log('imagesData:', images_data);
-    setBgImages(images_data);
-    if (images_data.length > 0) {
-      setSelectedBackground(images_data[0].image);
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setWindows((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
     }
-  }, []);
+  };
 
-  const fetchImages = async (axios) => {
+  const handleAddNewWindow = () => {
+    if (!newUrl) return;
+    let modifiedUrl = newUrl.startsWith("http://") || newUrl.startsWith("https://") ? newUrl : `https://${newUrl}`;
+    if (windows.some(window => window.url === modifiedUrl)) {
+      alert("URL already added.");
+      return;
+    }
+    setWindows([...windows, { id: `window-${windows.length + 1}`, title: `Window ${windows.length + 1}`, width: 300, height: 200, url: modifiedUrl }]);
+    setShowInput(false);
+    setNewUrl("");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleAddNewWindow();
+  };
+
+  const handleToggleInput = () => setShowInput(!showInput);
+  const handleToggleEditMode = () => setIsEditMode(!isEditMode);
+  const removeWindowHandler = id => setWindows(windows.filter(window => window.id !== id));
+  const removeIconHandler = url => setNonEmbeddableUrls(nonEmbeddableUrls.filter(u => u !== url));
+
+  const fetchImages = async () => {
     try {
       const response = await axios.get(endpoints.home_page.get_bg_images, {
-        headers: {
-          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
-        }
+        headers: { 'Authorization': `Bearer ${storageComunicator.authToken.get().access}` }
       });
-      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Error getting images:', error);
@@ -64,86 +74,28 @@ const MainPage = () => {
 
   const removeImage = async (imageId) => {
     if (bgImages.length === 1) return;
-
     try {
-      const response = await axios.post(endpoints.home_page.remove_bg_image, {
-        image_id: imageId
-      }, {
-        headers: {
-          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
-        }
+      const response = await axios.post(endpoints.home_page.remove_bg_image, { image_id: imageId }, {
+        headers: { 'Authorization': `Bearer ${storageComunicator.authToken.get().access}` }
       });
-      console.log('remove image successful:', response.data);
       setBgImages(response.data);
-      if (response.data.length > 0) {
-        setSelectedBackground(response.data[0].image);
-      } else {
-        setSelectedBackground(null);
-      }
-      return response.data;
     } catch (error) {
       console.error('Error removing image:', error);
     }
   };
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setWindows((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
-
-  const handleAddNewWindow = () => {
-    if (!newUrl) return;
-    let modifiedUrl = newUrl;
-    if (!modifiedUrl.startsWith("http://") && !modifiedUrl.startsWith("https://")) {
-      modifiedUrl = "https://" + modifiedUrl;
-    }
-    const urlExists = windows.some(window => window.url === modifiedUrl);
-    if (urlExists) {
-      alert("URL already added.");
-      return;
-    }
-    const newWindow = {
-      id: `window-${windows.length + 1}`,
-      title: `Window ${windows.length + 1}`,
-      width: 300,
-      height: 200,
-      url: modifiedUrl,
+  useEffect(() => {
+    const fetchAndSetImages = async () => {
+      const imagesData = await fetchImages();
+      setBgImages(imagesData);
     };
-    setWindows([...windows, newWindow]);
-    setShowInput(false);
-    setNewUrl("");
-  };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleAddNewWindow();
-    }
-  };
-
-  const handleToggleInput = () => {
-    setShowInput(!showInput);
-  };
-
-  const handleToggleEditMode = () => {
-    setIsEditMode(!isEditMode);
-  };
-
-  const removeWindowHandler = (id) => {
-    setWindows(windows.filter(window => window.id !== id));
-  };
-
-  const removeIconHandler = (url) => {
-    setNonEmbeddableUrls(nonEmbeddableUrls.filter(u => u !== url));
-  };
+    fetchAndSetImages();
+  }, []);
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+
       <div className="root" style={{ backgroundImage: `url(${selectedBackground})` }}>
         <div className="header">
           <div className="header-actions">
@@ -158,25 +110,10 @@ const MainPage = () => {
           </div>
           <GoogleSearch />
         </div>
-        <SortableContext items={windowsIds}>
-          <div className="widgets-container">
-            <div className="windows-container">
-              {currentIframes.map((window) => (
-                <Iframe
-                  key={window.id}
-                  id={window.id}
-                  title={window.title}
-                  width={window.width}
-                  height={window.height}
-                  url={window.url}
-                  onClose={removeWindowHandler}
-                  isEditMode={isEditMode}
-                />
-              ))}
-            </div>
-            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
-          </div>
-        </SortableContext>
+
+        <HomepageGrid />
+       
+
         <div className="bottom-part">
           <div>
             <input
@@ -217,15 +154,16 @@ const MainPage = () => {
           )}
           {showBackgroundSelector && (
             <div className="background-selector-popup">
+              {/* {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => ( */}
               {bgImages.map((bgImage, index) => (
                 <div
                   key={index}
                   className={`background-option relative ${
-                    selectedBackground === bgImage.image ? "selected" : ""
+                    selectedBackground === bgImage ? "selected" : ""
                   }`}
                   onClick={() => setSelectedBackground(bgImage.image)}
                 >
-                  <button className="absolute -top-10 p-0.5 px-2 bg-red-500 rounded-full text-white" onClick={() => removeImage(bgImage.id)}>X</button>
+                  <button className="absolute -top-10 p-0.5 px-2 bg-red-500 rounded-full text-white" onClick={() => {removeImage(bgImage.id)}}>X</button>
                   <img src={bgImage.image} alt={`Background ${index}`} />
                 </div>
               ))}
@@ -243,6 +181,7 @@ const MainPage = () => {
       </div>
     </DndContext>
   );
+  
 };
 
 export default MainPage;
