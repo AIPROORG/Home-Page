@@ -1,12 +1,12 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import { BrowserRouter as Router } from 'react-router-dom';
+import { arrayMove } from "@dnd-kit/sortable";
 import axios from "axios";
 
-import { GoogleSearch, } from "../components";
+import { GoogleSearch } from "../components";
 import BgImageUpload from "../components/BgImageUpload";
 import HomepageGrid from "../components/HomepageGrid";
+import ToDoList from '../components/ToDoList';
 
 import storageComunicator from "../utils/storageComunication";
 import { endpoints } from "../utils/endpoints";
@@ -25,8 +25,8 @@ const MainPage = () => {
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [isIconBarVisible, setIsIconBarVisible] = useState(false);
   const [bgImages, setBgImages] = useState([]);
+  const [showToDoList, setShowToDoList] = useState(false);
 
-  const windowsIds = useMemo(() => windows.map(window => window.id), [windows]);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   const handleDragEnd = (event) => {
@@ -47,7 +47,7 @@ const MainPage = () => {
       alert("URL already added.");
       return;
     }
-    setWindows([...windows, { id: `window-${windows.length + 1}`, title: `Window ${windows.length + 1}`, width: 300, height: 200, url: modifiedUrl }]);
+    setWindows([...windows, { id: `window-${windows.length + 1}`, title: `Window ${windows.length + 1}`, url: modifiedUrl }]);
     setShowInput(false);
     setNewUrl("");
   };
@@ -66,7 +66,7 @@ const MainPage = () => {
       const response = await axios.get(endpoints.home_page.get_bg_images, {
         headers: { 'Authorization': `Bearer ${storageComunicator.authToken.get().access}` }
       });
-      return response.data;
+      setBgImages(response.data);
     } catch (error) {
       console.error('Error getting images:', error);
     }
@@ -95,13 +95,13 @@ const MainPage = () => {
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-
       <div className="root" style={{ backgroundImage: `url(${selectedBackground})` }}>
         <div className="header">
           <div className="header-actions">
             <button className="highlighted-button add-btn" onClick={handleToggleInput}>+</button>
             <button className={`highlighted-button ${nonEmbeddableUrls.length === 0 && windows.length === 0 ? "disabled-btn" : ""}`} disabled={nonEmbeddableUrls.length === 0 && windows.length === 0} onClick={handleToggleEditMode}>Edit</button>
             <button className="highlighted-button" onClick={() => setShowBackgroundSelector(!showBackgroundSelector)}>⚙️</button>
+            <button className="highlighted-button" onClick={() => setShowToDoList(!showToDoList)}>Open ToDo List</button>
             {showInput && (
               <div className="add-new-url-popup">
                 <input className="add-new-url-input form-control" type="text" value={newUrl} onChange={(e) => setNewUrl(e.target.value)} onKeyDown={handleKeyPress} placeholder="Introduceți URL-ul site-ului" autoFocus />
@@ -111,8 +111,9 @@ const MainPage = () => {
           <GoogleSearch />
         </div>
 
-        <HomepageGrid />
-       
+        {showToDoList && <ToDoList />}
+
+        <HomepageGrid windows={windows} handleRemoveWindow={removeWindowHandler} isEditMode={isEditMode} />
 
         <div className="bottom-part">
           <div>
