@@ -1,28 +1,90 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import Iframe from "../components/Iframe"; // Adjust the path as necessary
 import { GoogleSearch } from "../components";
-
-import bgHomepage from "../images/bg-homepage.jpg";
-import bg1 from "../images/bg1.jpg";
-import bg2 from "../images/bg2.jpg";
-import bg3 from "../images/bg3.jpg";
+import Pagination from "../components/Pagination";
+import storageComunicator from "../utils/storageComunication";
+import axios from "axios";
 import "../css/MainPage.css";
 import "../css/HideShow.css";
+import { endpoints } from "../utils/endpoints";
+import BgImageUpload from "../components/BgImageUpload";
 
 const MainPage = () => {
-  const [windows, setWindows] = useState([]);
+  const [windows, setWindows] = useState(() => {
+    const savedWindows = localStorage.getItem("windows");
+    return savedWindows ? JSON.parse(savedWindows) : [];
+  });
   const [nonEmbeddableUrls, setNonEmbeddableUrls] = useState([]);
   const [newUrl, setNewUrl] = useState("");
   const [showInput, setShowInput] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedBackground, setSelectedBackground] = useState(bgHomepage);
+  const [selectedBackground, setSelectedBackground] = useState();
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [isIconBarVisible, setIsIconBarVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [bgImages, setBgImages] = useState([]);
+  const iframesPerPage = 2;
+  const totalPages = Math.ceil(windows.length / iframesPerPage);
+
+  const indexOfLastIframe = currentPage * iframesPerPage;
+  const indexOfFirstIframe = indexOfLastIframe - iframesPerPage;
+  const currentIframes = windows.slice(indexOfFirstIframe, indexOfLastIframe);
 
   const windowsIds = useMemo(() => windows.map((window) => window.id), [windows]);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
+
+  useEffect(() => {
+    localStorage.setItem("windows", JSON.stringify(windows));
+  }, [windows]);
+
+  useEffect(async () => {
+    let images_data = await fetchImages(axios);
+    console.log('imagesData:', images_data);
+    setBgImages(images_data);
+    if (images_data.length > 0) {
+      setSelectedBackground(images_data[0].image);
+    }
+  }, []);
+
+  const fetchImages = async (axios) => {
+    try {
+      const response = await axios.get(endpoints.home_page.get_bg_images, {
+        headers: {
+          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
+        }
+      });
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+      console.error('Error getting images:', error);
+    }
+  };
+
+  const removeImage = async (imageId) => {
+    if (bgImages.length === 1) return;
+
+    try {
+      const response = await axios.post(endpoints.home_page.remove_bg_image, {
+        image_id: imageId
+      }, {
+        headers: {
+          'Authorization':'Bearer ' + String(storageComunicator.authToken.get().access)
+        }
+      });
+      console.log('remove image successful:', response.data);
+      setBgImages(response.data);
+      if (response.data.length > 0) {
+        setSelectedBackground(response.data[0].image);
+      } else {
+        setSelectedBackground(null);
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error removing image:', error);
+    }
+  };
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -99,7 +161,7 @@ const MainPage = () => {
         <SortableContext items={windowsIds}>
           <div className="widgets-container">
             <div className="windows-container">
-              {windows.map((window) => (
+              {currentIframes.map((window) => (
                 <Iframe
                   key={window.id}
                   id={window.id}
@@ -112,6 +174,7 @@ const MainPage = () => {
                 />
               ))}
             </div>
+            <Pagination currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
           </div>
         </SortableContext>
         <div className="bottom-part">
@@ -154,15 +217,16 @@ const MainPage = () => {
           )}
           {showBackgroundSelector && (
             <div className="background-selector-popup">
-              {[bgHomepage, bg1, bg2, bg3].map((bgImage, index) => (
+              {bgImages.map((bgImage, index) => (
                 <div
                   key={index}
-                  className={`background-option ${
-                    selectedBackground === bgImage ? "selected" : ""
+                  className={`background-option relative ${
+                    selectedBackground === bgImage.image ? "selected" : ""
                   }`}
-                  onClick={() => setSelectedBackground(bgImage)}
+                  onClick={() => setSelectedBackground(bgImage.image)}
                 >
-                  <img src={bgImage} alt={`Background ${index}`} />
+                  <button className="absolute -top-10 p-0.5 px-2 bg-red-500 rounded-full text-white" onClick={() => removeImage(bgImage.id)}>X</button>
+                  <img src={bgImage.image} alt={`Background ${index}`} />
                 </div>
               ))}
               <button
@@ -171,13 +235,14 @@ const MainPage = () => {
               >
                 OK
               </button>
+
+              <BgImageUpload setBgImages={[bgImages,setBgImages]}  />
             </div>
           )}
         </div>
       </div>
     </DndContext>
   );
-  
 };
 
 export default MainPage;
